@@ -1,0 +1,26 @@
+{
+  "name": "hanger-co",
+  "version": "1.0.0",
+  "description": "Wish Enterprise — full-stack wholesale & retail hanger catalogue (React + Express + SQLite)",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "postinstall": "npm run seed",
+    "dev": "concurrently -n SERVER,CLIENT -c blue,green \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "seed": "npm run seed -w server",
+    "build": "npm run build -w client",
+    "start": "npm run start -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

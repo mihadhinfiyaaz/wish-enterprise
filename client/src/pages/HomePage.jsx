@@ -1,13 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Tags, LayoutGrid, Headphones, ArrowRight, ArrowUpRight } from 'lucide-react';
-import HangerRender from '../components/HangerRender';
 import ProductImage from '../components/ProductImage';
 import api from '../lib/api';
 import { useSite } from '../context/SiteContext';
-
-// A category's representative material for its showcase render.
-const CATEGORY_MATERIAL = { wood: 'Wood', metal: 'Metal', plastic: 'Plastic', clip: 'Metal' };
+import { getCategoryImage } from '../lib/productImages';
 
 const BENEFITS = [
   { icon: ShieldCheck, title: 'Premium Quality', text: 'Built to last.' },
@@ -109,14 +106,16 @@ function FeaturedCategories() {
           <Link
             key={cat.slug}
             to={`/hangers?category=${cat.slug}`}
-            className="group card flex flex-col items-center gap-5 p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:border-line-2 hover:shadow-lift"
+            className="group card flex flex-col items-center gap-4 p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-line-2 hover:shadow-lift"
           >
-            <div className="relative flex h-28 w-full items-center justify-center">
-              <div className="media-glow pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-              <HangerRender
-                variant={cat.icon || 'suit'}
-                material={CATEGORY_MATERIAL[cat.slug] || 'Wood'}
-                className="relative h-28 w-36 transition-transform duration-500 group-hover:scale-105"
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-line">
+              <ProductImage
+                product={{ hanger_style: cat.icon || 'suit' }}
+                image={
+                  getCategoryImage(cat.slug)
+                    ? { src: getCategoryImage(cat.slug), alt: `${cat.name} — product photo` }
+                    : undefined
+                }
               />
             </div>
             <div>

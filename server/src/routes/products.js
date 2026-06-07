@@ -35,7 +35,7 @@ function attachProductRelations(product) {
 const PRODUCT_SELECT = `
   SELECT p.id, p.sku, p.slug, p.name, p.material, p.type, p.is_clip,
          p.retail_price, p.wholesale_price, p.rating, p.review_count, p.size, p.durability,
-         p.finish, p.material_detail, p.description, p.hanger_style,
+         p.finish, p.material_detail, p.description, p.hanger_style, p.image,
          p.popularity, p.created_at,
          c.slug AS category_slug, c.name AS category_name
   FROM products p

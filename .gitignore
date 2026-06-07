@@ -10,6 +10,9 @@ server/data/*.db
 server/data/*.db-shm
 server/data/*.db-wal
 
+# admin-uploaded product images (runtime data)
+server/uploads/
+
 # env & logs
 .env
 .env.local

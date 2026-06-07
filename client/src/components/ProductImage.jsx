@@ -19,7 +19,10 @@ export default function ProductImage({
   className = '',
   sizes,
 }) {
-  const image = imageProp || getProductImage(product);
+  // Priority: explicit prop → admin-uploaded DB image → bundled studio default.
+  const image =
+    imageProp ||
+    (product?.image ? { src: product.image, alt: `${product.name || 'Hanger'} — product photo` } : getProductImage(product));
   const [loaded, setLoaded] = useState(false);
 
   // Re-trigger the fade-in when the chosen photo changes (e.g. gallery switch).

@@ -21,7 +21,6 @@ export default function Footer() {
           <p className="font-display text-sm font-bold uppercase tracking-brand text-fg">
             {site.company_name}
           </p>
-          <p className="mt-3 text-sm leading-relaxed text-muted">{site.tagline}</p>
           <p className="mt-4 text-sm text-muted">{site.address_line1}</p>
           <p className="text-sm text-muted">{site.address_line2}</p>
           <a
@@ -114,7 +113,12 @@ export default function Footer() {
       <div className="border-t border-line">
         <div className="container-page flex flex-col items-center justify-between gap-2 py-6 text-xs text-faint sm:flex-row">
           <p>© {new Date().getFullYear()} {site.company_name} — All rights reserved.</p>
-          <p>Wholesale &amp; Retail Hangers · Built for bulk.</p>
+          <div className="flex items-center gap-4">
+            <span>Wholesale &amp; Retail Hangers</span>
+            <Link to="/admin" className="transition-colors hover:text-accent">
+              Admin
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

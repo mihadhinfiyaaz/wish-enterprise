@@ -16,6 +16,7 @@ import categoriesRouter from './routes/categories.js';
 import productsRouter from './routes/products.js';
 import inquiriesRouter from './routes/inquiries.js';
 import siteRouter from './routes/site.js';
+import adminRouter from './routes/admin.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
@@ -31,7 +32,7 @@ console.log(
 const app = express();
 app.disable('x-powered-by');
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '8mb' })); // base64 image uploads from the admin panel
 
 // Tiny request logger (kept dependency-free).
 app.use((req, _res, next) => {
@@ -41,12 +42,16 @@ app.use((req, _res, next) => {
   next();
 });
 
+// Admin-uploaded product images (served in dev via the Vite /uploads proxy).
+app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+
 // ── API ──────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 app.use('/api/categories', categoriesRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/inquiries', inquiriesRouter);
 app.use('/api/site', siteRouter);
+app.use('/api/admin', adminRouter);
 
 // Unknown API route → JSON 404 (so the SPA fallback never swallows it).
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));

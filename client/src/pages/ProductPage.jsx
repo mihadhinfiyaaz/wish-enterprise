@@ -8,44 +8,13 @@ import Spinner from '../components/Spinner';
 import ProductCard from '../components/ProductCard';
 import api from '../lib/api';
 import { useSite } from '../context/SiteContext';
-import { getProductImages } from '../lib/productImages';
 import { formatPrice, whatsappLink, telLink } from '../lib/format';
 
-// Studio product gallery — shows the matched local photo(s) for this product.
-// Single photo → large studio shot with hover zoom. Multiple → thumbnail strip.
+// Studio product image — one clean photo per product (admin-managed or default).
 function Gallery({ product }) {
-  const images = getProductImages(product);
-  const [active, setActive] = useState(0);
-  const main = images[active] || null;
-
   return (
-    <div>
-      <div className="group card relative aspect-square overflow-hidden">
-        <ProductImage product={product} image={main} />
-      </div>
-
-      {images.length > 1 && (
-        <div className="mt-4 grid grid-cols-4 gap-3">
-          {images.map((im, i) => (
-            <button
-              key={im.src}
-              onClick={() => setActive(i)}
-              className={`studio-stage aspect-square overflow-hidden rounded-xl border transition-all ${
-                active === i ? 'border-accent shadow-card' : 'border-line hover:border-line-2'
-              }`}
-              aria-label={`View ${i + 1}`}
-            >
-              <img
-                src={im.src}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-contain p-3 [mix-blend-mode:multiply]"
-              />
-            </button>
-          ))}
-        </div>
-      )}
+    <div className="group card relative aspect-square overflow-hidden">
+      <ProductImage product={product} />
     </div>
   );
 }

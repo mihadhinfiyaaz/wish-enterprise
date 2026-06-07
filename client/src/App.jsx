@@ -7,10 +7,14 @@ import WholesalePage from './pages/WholesalePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import NotFoundPage from './pages/NotFoundPage';
+import AdminPage from './pages/AdminPage';
 
 export default function App() {
   return (
     <Routes>
+      {/* Admin panel — standalone (its own chrome, no public header/footer) */}
+      <Route path="/admin" element={<AdminPage />} />
+
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="hangers" element={<CataloguePage />} />

@@ -57,6 +57,7 @@ export function initSchema() {
       material_detail TEXT,
       description     TEXT,
       hanger_style    TEXT    DEFAULT 'suit',
+      image           TEXT,
       popularity      INTEGER DEFAULT 0,
       created_at      TEXT    DEFAULT (datetime('now'))
     );
@@ -104,6 +105,17 @@ export function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_tiers_product     ON price_tiers(product_id);
     CREATE INDEX IF NOT EXISTS idx_inquiries_created ON inquiries(created_at);
   `);
+
+  // Lightweight migrations: add columns that may be missing on older DBs.
+  ensureColumn('products', 'image', 'image TEXT');
+}
+
+/** Add a column to a table if it doesn't already exist (idempotent migration). */
+function ensureColumn(table, column, ddl) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name);
+  if (!cols.includes(column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+  }
 }
 
 export default db;

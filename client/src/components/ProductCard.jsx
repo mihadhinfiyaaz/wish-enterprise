@@ -28,8 +28,10 @@ export default function ProductCard({ product }) {
             <p className="mt-0.5 text-base font-semibold text-fg">{formatPrice(product.retail_price)}</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-faint">Wholesale</p>
-            <p className="mt-0.5 text-base font-semibold text-accent">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-2 dark:text-accent">
+              Wholesale
+            </p>
+            <p className="mt-0.5 text-base font-bold text-fg">
               {formatPrice(product.wholesale_price)}
             </p>
           </div>

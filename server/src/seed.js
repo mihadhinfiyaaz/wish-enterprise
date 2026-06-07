@@ -145,18 +145,16 @@ const SITE_SETTINGS = {
   hero_title: 'Quality Hangers for Wholesale & Retail',
   hero_subtitle: 'Premium materials. Superior durability. Designed for every need.',
   about: 'Wish Enterprise supplies premium hangers to retailers, boutiques, dry cleaners and distributors. From solid-wood suit hangers to heavy-duty metal and cost-effective plastic, every product is built to last and priced for bulk.',
-  // NOTE: the contact details below are placeholders — replace with the real
-  // Wish Enterprise email / phone / address / hours.
-  email: 'info@wishenterprise.com',
-  phone_primary: '+1 (555) 123-4567',
-  phone_secondary: '+1 (555) 123-4568',
-  whatsapp_number: '15551234567',
-  address_line1: '123 Hanger Street, Industrial Area',
-  address_line2: 'City 00000',
+  email: 'minfiyaaz@yahoo.com',
+  phone_primary: '+94 77 751 8286',
+  phone_secondary: '+94 11 244 9134',
+  whatsapp_number: '94777518286',
+  address_line1: '223, 10 2nd Cross Street',
+  address_line2: 'Colombo 11',
   hours_weekday: 'Monday – Friday: 9:00 AM – 6:00 PM',
   hours_saturday: 'Saturday: 9:00 AM – 1:00 PM',
   hours_sunday: 'Sunday: Closed',
-  map_query: 'Wish Enterprise',
+  map_query: '223 2nd Cross Street Colombo 11',
   map_url: 'https://maps.app.goo.gl/zAhtt37NwMJT5qh26',
 };
 

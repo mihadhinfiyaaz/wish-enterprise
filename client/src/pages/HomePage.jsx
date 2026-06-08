@@ -6,7 +6,7 @@ import {
 
 // White-background hangers lineup — blends into the studio niche like the other slides.
 // ?v busts the browser cache after re-editing the file.
-const RANGE_IMAGE = '/hangers-range.png?v=2';
+const HERO_CLOTHES = '/hero-clothes.jpg';
 import ProductImage from '../components/ProductImage';
 import ProductCard from '../components/ProductCard';
 import api from '../lib/api';
@@ -33,7 +33,7 @@ function Hero() {
     () => [
       { title: site.hero_title, subtitle: site.hero_subtitle, material: 'Wood', type: 'Suit' },
       { title: 'Built for bulk. Priced for business.', subtitle: 'Honest wholesale prices on every product in our range.', material: 'Metal', type: 'Suit' },
-      { title: 'Wood, metal, plastic & clip.', subtitle: 'One trusted Colombo supplier for every hanger you need.', customImage: RANGE_IMAGE },
+      { title: 'Wood, metal, plastic & clip.', subtitle: 'One trusted Colombo supplier for every hanger you need.', customImage: HERO_CLOTHES },
     ],
     [site.hero_title, site.hero_subtitle]
   );
@@ -73,11 +73,15 @@ function Hero() {
               key={slide.customImage}
               className="group relative aspect-[4/3] w-full animate-fade-in overflow-hidden rounded-[2rem] border border-line shadow-lift"
             >
-              <ProductImage
-                image={{ src: slide.customImage, alt: 'Wood, metal, plastic and clip hangers' }}
-                zoom={false}
-                pad="4%"
+              <img
+                src={slide.customImage}
+                alt="Neatly hung clothes on hangers"
+                className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+                draggable="false"
               />
+              {/* subtle vignette + soft fade so the photo melts into the page rather than a hard box */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(125%_115%_at_50%_42%,transparent_55%,rgba(45,33,24,0.18))]" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/15 to-transparent" />
             </div>
           ) : (
             <div

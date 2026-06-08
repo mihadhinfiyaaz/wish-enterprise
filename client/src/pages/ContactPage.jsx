@@ -150,16 +150,16 @@ export default function ContactPage() {
         <aside className="space-y-5">
           <div className="card p-7">
             <h3 className="eyebrow mb-4">Talk to Us</h3>
-            <a href={telLink(site.phone_primary)} className="flex items-center gap-3 py-2.5 text-sm text-fg transition-colors hover:text-accent">
-              <Phone size={16} className="text-muted" /> {site.phone_primary}
-            </a>
             <a
               href={whatsappLink(site.whatsapp_number, `Hi ${site.company_name}, I have a wholesale enquiry.`)}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-3 py-2.5 text-sm text-fg transition-colors hover:text-whatsapp"
             >
-              <MessageCircle size={16} className="text-muted" /> WhatsApp us
+              <MessageCircle size={16} className="text-muted" /> {site.phone_primary} (WhatsApp)
+            </a>
+            <a href={telLink(site.phone_secondary)} className="flex items-center gap-3 py-2.5 text-sm text-fg transition-colors hover:text-accent">
+              <Phone size={16} className="text-muted" /> {site.phone_secondary}
             </a>
             <a href={`mailto:${site.email}`} className="flex items-center gap-3 py-2.5 text-sm text-fg transition-colors hover:text-accent">
               <Mail size={16} className="text-muted" /> {site.email}

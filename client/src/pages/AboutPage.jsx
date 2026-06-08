@@ -1,20 +1,27 @@
 import { Link } from 'react-router-dom';
-import { Factory, Globe2, Award } from 'lucide-react';
+import { Boxes, MapPin, Award } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb';
 import ProductImage from '../components/ProductImage';
+import { getCategoryImage } from '../lib/productImages';
 import { useSite } from '../context/SiteContext';
 
 const STATS = [
-  { value: '20+', label: 'Years in business' },
+  { value: '15+', label: 'Years in business' },
   { value: '4', label: 'Hanger materials' },
-  { value: '500+', label: 'Wholesale clients' },
-  { value: '1M+', label: 'Hangers shipped / yr' },
+  { value: '100s', label: 'Products in stock' },
 ];
 
 const VALUES = [
-  { icon: Award, title: 'Quality First', text: 'Every hanger is made from premium materials and built to last.' },
-  { icon: Factory, title: 'Made for Volume', text: 'Manufacturing and logistics tuned for reliable bulk supply.' },
-  { icon: Globe2, title: 'Trusted Worldwide', text: 'Retailers, boutiques and distributors across the globe rely on us.' },
+  { icon: Award, title: 'Quality First', text: 'Every hanger is chosen from durable, premium materials and built to last.' },
+  { icon: Boxes, title: 'Wholesale & Retail', text: 'From single packs to bulk orders — priced for businesses and individuals alike.' },
+  { icon: MapPin, title: 'Trusted across Sri Lanka', text: 'Retailers, boutiques, dry cleaners and households countrywide rely on us.' },
+];
+
+const COLLAGE = [
+  { slug: 'wood', label: 'Wood' },
+  { slug: 'metal', label: 'Metal' },
+  { slug: 'plastic', label: 'Plastic' },
+  { slug: 'clip', label: 'Clip' },
 ];
 
 export default function AboutPage() {
@@ -32,35 +39,50 @@ export default function AboutPage() {
           <p className="mt-6 text-lg leading-relaxed text-muted">{site.about}</p>
           <p className="mt-4 leading-relaxed text-muted">
             From solid-wood suit hangers to heavy-duty metal and cost-effective plastic, every product is
-            designed to protect garments and priced to move in bulk.
+            designed to protect garments and priced to move — whether you need a single pack or a pallet.
           </p>
           <Link to="/wholesale" className="btn-outline mt-8">
             Explore Wholesale
           </Link>
         </div>
-        <div className="flex justify-center">
-          <div className="group relative aspect-square w-full max-w-sm overflow-hidden rounded-[2rem] border border-line shadow-card">
-            <ProductImage
-              product={{ hanger_style: 'suit', material: 'Wood', name: 'Wish Enterprise wood hanger' }}
-              zoom={false}
-            />
+
+        {/* Staggered studio collage of the full range */}
+        <div className="relative">
+          <div className="media-glow pointer-events-none absolute -inset-6 opacity-70" />
+          <div className="relative grid grid-cols-2 gap-4 sm:gap-5">
+            {COLLAGE.map((c, i) => (
+              <div
+                key={c.slug}
+                className={`group relative aspect-square overflow-hidden rounded-2xl border border-line shadow-lift transition-transform duration-500 hover:-translate-y-1 ${
+                  i % 2 === 1 ? 'translate-y-6 sm:translate-y-8' : ''
+                }`}
+              >
+                <ProductImage
+                  product={{ hanger_style: c.slug === 'clip' ? 'clip' : 'suit' }}
+                  image={getCategoryImage(c.slug) ? { src: getCategoryImage(c.slug), alt: `${c.label} hanger` } : undefined}
+                />
+                <span className="pill absolute bottom-2.5 left-2.5 !py-0.5 text-[10px] uppercase tracking-wider">
+                  {c.label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="mt-16 grid grid-cols-2 gap-5 lg:grid-cols-4">
+      <section className="mt-20 grid grid-cols-3 gap-4 sm:gap-5">
         {STATS.map((s) => (
-          <div key={s.label} className="card p-7 text-center">
-            <div className="font-display text-4xl font-bold text-accent">{s.value}</div>
-            <div className="mt-2 text-xs uppercase tracking-wider text-muted">{s.label}</div>
+          <div key={s.label} className="card p-6 text-center shadow-card sm:p-7">
+            <div className="font-display text-3xl font-bold text-accent sm:text-4xl">{s.value}</div>
+            <div className="mt-2 text-[11px] uppercase tracking-wider text-muted sm:text-xs">{s.label}</div>
           </div>
         ))}
       </section>
 
       <section className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
         {VALUES.map(({ icon: Icon, title, text }) => (
-          <div key={title} className="card p-7">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-surface-2 text-accent">
+          <div key={title} className="card p-7 shadow-card">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent-2 text-white shadow-[0_8px_18px_-8px_rgb(var(--c-accent)/0.6)]">
               <Icon size={20} />
             </div>
             <h3 className="mt-4 font-display text-sm font-semibold text-fg">{title}</h3>

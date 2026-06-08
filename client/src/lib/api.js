@@ -91,6 +91,11 @@ export const api = {
     createCategory: (data) => adminRequest('/categories', { method: 'POST', body: JSON.stringify(data) }),
     updateCategory: (id, data) => adminRequest(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     deleteCategory: (id) => adminRequest(`/categories/${id}`, { method: 'DELETE' }),
+
+    stats: () => adminRequest('/stats'),
+    listInquiries: () => adminRequest('/inquiries'),
+    updateInquiry: (id, status) => adminRequest(`/inquiries/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    deleteInquiry: (id) => adminRequest(`/inquiries/${id}`, { method: 'DELETE' }),
   },
 };
 

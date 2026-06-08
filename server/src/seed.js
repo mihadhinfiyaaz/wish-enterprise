@@ -7,6 +7,7 @@
  * Run automatically on `npm install` (root postinstall) and on server boot.
  */
 import { pathToFileURL } from 'node:url';
+import bcrypt from 'bcryptjs';
 import { db, initSchema, DB_PATH } from './db.js';
 
 /* ──────────────────────────────────────────────────────────────
@@ -53,17 +54,11 @@ const MATERIAL_SPECS = {
   },
 };
 
-// Tiered wholesale pricing: per-piece price = retail × factor, cheaper at higher volume.
-const PRICE_TIERS = [
-  { label: '50 – 99', min_qty: 50, max_qty: 99, factor: 0.65 },
-  { label: '150 – 299', min_qty: 150, max_qty: 299, factor: 0.58 },
-  { label: '300 – 499', min_qty: 300, max_qty: 499, factor: 0.52 },
-  { label: '500+', min_qty: 500, max_qty: null, factor: 0.45 },
-];
-
-const money = (n) => Math.round(n * 100) / 100;
-// Headline "Wholesale Price" = the entry (smallest-quantity) tier.
-const wholesaleBase = (retail) => money(retail * PRICE_TIERS[0].factor);
+// Prices are in Sri Lankan rupees (LKR), whole numbers. The catalogue figures
+// below were authored as small units, so we scale them to realistic LKR.
+const toLKR = (n) => Math.round(n * 100);
+// Wholesale price ≈ 65% of retail (single bulk price — no tiered pricing).
+const wholesaleBase = (retailLKR) => Math.round(retailLKR * 0.65);
 
 const CATEGORIES = [
   { slug: 'wood', name: 'Wood Hangers', icon: 'suit', sort_order: 1,
@@ -152,7 +147,7 @@ const SITE_SETTINGS = {
   address_line1: '223, 10 2nd Cross Street',
   address_line2: 'Colombo 11',
   hours_weekday: 'Monday – Friday: 9:00 AM – 6:00 PM',
-  hours_saturday: 'Saturday: 9:00 AM – 1:00 PM',
+  hours_saturday: 'Saturday: 9:00 AM – 6:00 PM',
   hours_sunday: 'Sunday: Closed',
   map_query: '223 2nd Cross Street Colombo 11',
   map_url: 'https://maps.app.goo.gl/zAhtt37NwMJT5qh26',
@@ -163,7 +158,7 @@ const SITE_SETTINGS = {
    ────────────────────────────────────────────────────────────── */
 function clearTables() {
   // Order matters because of FK constraints.
-  for (const t of ['inquiries', 'price_tiers', 'product_colors', 'products', 'categories', 'site_settings']) {
+  for (const t of ['inquiries', 'price_tiers', 'product_colors', 'products', 'categories', 'site_settings', 'admin_users']) {
     db.exec(`DELETE FROM ${t};`);
   }
   // Reset autoincrement counters if the sqlite_sequence table exists.
@@ -193,10 +188,6 @@ export function seed({ force = false } = {}) {
   const insertColor = db.prepare(
     `INSERT INTO product_colors (product_id, name, hex, sort_order) VALUES (?, ?, ?, ?)`
   );
-  const insertTier = db.prepare(
-    `INSERT INTO price_tiers (product_id, label, min_qty, max_qty, price, sort_order)
-     VALUES (?, ?, ?, ?, ?, ?)`
-  );
   const insertSetting = db.prepare(
     `INSERT INTO site_settings (key, value) VALUES (?, ?)`
   );
@@ -225,6 +216,7 @@ export function seed({ force = false } = {}) {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
 
+      const retail = toLKR(p.price);
       const res = insertProduct.run(
         p.sku,
         slug,
@@ -233,8 +225,8 @@ export function seed({ force = false } = {}) {
         p.material,
         p.type,
         isClip,
-        p.price,
-        wholesaleBase(p.price),
+        retail,
+        wholesaleBase(retail),
         p.rating ?? 4.5,
         p.reviews ?? 0,
         specs.size,
@@ -248,15 +240,20 @@ export function seed({ force = false } = {}) {
       const productId = Number(res.lastInsertRowid);
 
       specs.colors.forEach(([name, hex], idx) => insertColor.run(productId, name, hex, idx));
-      PRICE_TIERS.forEach((t, idx) =>
-        insertTier.run(productId, t.label, t.min_qty, t.max_qty, money(p.price * t.factor), idx)
-      );
     });
 
     // Site settings
     for (const [key, value] of Object.entries(SITE_SETTINGS)) {
       insertSetting.run(key, String(value));
     }
+
+    // Default admin user (bcrypt-hashed). Password from ADMIN_PASSWORD (default below).
+    const adminPassword = process.env.ADMIN_PASSWORD || 'wishadmin';
+    db.prepare('INSERT INTO admin_users (username, password_hash, role) VALUES (?, ?, ?)').run(
+      'admin',
+      bcrypt.hashSync(adminPassword, 10),
+      'admin'
+    );
 
     db.exec('COMMIT');
   } catch (err) {

@@ -7,9 +7,10 @@
  */
 import express from 'express';
 import cors from 'cors';
+import https from 'node:https';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 import { seed } from './seed.js';
 import categoriesRouter from './routes/categories.js';
@@ -31,6 +32,7 @@ console.log(
 
 const app = express();
 app.disable('x-powered-by');
+app.set('trust proxy', 1); // correct req.ip behind a TLS-terminating proxy (for rate limiting)
 app.use(cors());
 app.use(express.json({ limit: '8mb' })); // base64 image uploads from the admin panel
 
@@ -77,6 +79,23 @@ app.use((err, _req, res, _next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  Wish Enterprise API  →  http://localhost:${PORT}\n`);
-});
+// ── Listen (HTTP by default; HTTPS when HTTPS=true) ──────────────
+const useHttps = ['true', '1'].includes(String(process.env.HTTPS).toLowerCase());
+if (useHttps) {
+  let key = process.env.SSL_KEY_FILE && existsSync(process.env.SSL_KEY_FILE) ? readFileSync(process.env.SSL_KEY_FILE) : null;
+  let cert = process.env.SSL_CERT_FILE && existsSync(process.env.SSL_CERT_FILE) ? readFileSync(process.env.SSL_CERT_FILE) : null;
+  if (!key || !cert) {
+    const { default: selfsigned } = await import('selfsigned');
+    const pems = selfsigned.generate([{ name: 'commonName', value: 'localhost' }], { days: 365, keySize: 2048 });
+    key = pems.private;
+    cert = pems.cert;
+    console.log('⚠ HTTPS: using a generated self-signed certificate (development only).');
+  }
+  https.createServer({ key, cert }, app).listen(PORT, () => {
+    console.log(`\n  Wish Enterprise API  →  https://localhost:${PORT}\n`);
+  });
+} else {
+  app.listen(PORT, () => {
+    console.log(`\n  Wish Enterprise API  →  http://localhost:${PORT}\n`);
+  });
+}

@@ -49,17 +49,6 @@ router.post('/', (req, res) => {
   res.status(201).json({ ok: true, inquiry: created });
 });
 
-// GET /api/inquiries — lightweight admin listing (most recent first).
-router.get('/', (req, res) => {
-  const limit = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
-  const rows = db
-    .prepare(`SELECT i.*, p.name AS product_name
-              FROM inquiries i
-              LEFT JOIN products p ON p.id = i.product_id
-              ORDER BY i.created_at DESC, i.id DESC
-              LIMIT ?`)
-    .all(limit);
-  res.json(rows);
-});
+// Note: listing inquiries is admin-only — see /api/admin/inquiries.
 
 export default router;

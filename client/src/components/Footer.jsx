@@ -92,18 +92,18 @@ export default function Footer() {
           <ColTitle>Contact Us</ColTitle>
           <ul className="space-y-3 text-sm text-muted">
             <li>
-              <a href={telLink(site.phone_primary)} className="inline-flex items-center gap-2 transition-colors hover:text-accent">
-                <Phone size={14} /> {site.phone_primary}
-              </a>
-            </li>
-            <li>
               <a
                 href={whatsappLink(site.whatsapp_number, `Hi ${site.company_name}, I have a wholesale enquiry.`)}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 transition-colors hover:text-whatsapp"
               >
-                <MessageCircle size={14} /> {site.phone_secondary} (WhatsApp)
+                <MessageCircle size={14} /> {site.phone_primary} (WhatsApp)
+              </a>
+            </li>
+            <li>
+              <a href={telLink(site.phone_secondary)} className="inline-flex items-center gap-2 transition-colors hover:text-accent">
+                <Phone size={14} /> {site.phone_secondary}
               </a>
             </li>
           </ul>

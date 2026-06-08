@@ -98,6 +98,14 @@ export function initSchema() {
       value TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS admin_users (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      username      TEXT    UNIQUE NOT NULL,
+      password_hash TEXT    NOT NULL,
+      role          TEXT    NOT NULL DEFAULT 'admin',
+      created_at    TEXT    DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
     CREATE INDEX IF NOT EXISTS idx_products_material ON products(material);
     CREATE INDEX IF NOT EXISTS idx_products_type     ON products(type);

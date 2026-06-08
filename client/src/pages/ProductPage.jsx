@@ -1,128 +1,39 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { MessageCircle, Phone, PackageCheck, Zap, FileText } from 'lucide-react';
+import { MessageCircle, Phone, PackageCheck, Zap, FileText, Check } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb';
 import ProductImage from '../components/ProductImage';
-import Stars from '../components/Stars';
 import Spinner from '../components/Spinner';
 import ProductCard from '../components/ProductCard';
 import api from '../lib/api';
 import { useSite } from '../context/SiteContext';
 import { formatPrice, whatsappLink, telLink } from '../lib/format';
 
-// Studio product image — one clean photo per product (admin-managed or default).
-function Gallery({ product }) {
-  return (
-    <div className="group card relative aspect-square overflow-hidden">
-      <ProductImage product={product} />
-    </div>
-  );
-}
-
-function TierTable({ tiers }) {
-  return (
-    <div className="mt-7">
-      <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-fg">
-        Tiered Wholesale Pricing
-      </h3>
-      <p className="mt-1 text-xs text-muted">(Price varies based on quantity)</p>
-      <div className="mt-3.5 overflow-hidden rounded-xl border border-line">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-surface-3 text-[11px] uppercase tracking-wider text-muted">
-              <th className="px-4 py-3 text-left font-semibold">Quantity (QTY)</th>
-              <th className="px-4 py-3 text-right font-semibold">Price per PC</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tiers.map((t, i) => (
-              <tr key={i} className="border-t border-line transition-colors hover:bg-surface-2">
-                <td className="px-4 py-3 text-muted">{t.label}</td>
-                <td className="px-4 py-3 text-right font-semibold text-fg">
-                  {t.price == null ? 'Contact Us' : formatPrice(t.price)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function SpecRow({ label, value }) {
-  if (!value) return null;
-  return (
-    <div className="flex items-start justify-between gap-4 border-b border-line py-3.5 last:border-0">
-      <dt className="text-sm text-muted">{label}</dt>
-      <dd className="text-right text-sm font-medium text-fg">{value}</dd>
-    </div>
-  );
-}
-
-function Specifications({ product }) {
-  return (
-    <div className="card p-7">
-      <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-fg">
-        Specifications
-      </h3>
-      <dl className="mt-4">
-        <SpecRow label="Material" value={product.material_detail} />
-        <SpecRow label="Size" value={product.size} />
-        <SpecRow label="Durability" value={product.durability} />
-        <SpecRow label="Finish" value={product.finish} />
-        {product.colors?.length > 0 && (
-          <div className="flex items-center justify-between gap-4 py-3.5">
-            <dt className="text-sm text-muted">Color Options</dt>
-            <dd className="flex items-center gap-2">
-              {product.colors.map((c) => (
-                <span
-                  key={c.name}
-                  title={c.name}
-                  className="h-5 w-5 rounded-full border border-line ring-1 ring-inset ring-black/5"
-                  style={{ backgroundColor: c.hex }}
-                />
-              ))}
-            </dd>
-          </div>
-        )}
-      </dl>
-    </div>
-  );
-}
-
-function OrderCTA({ product }) {
+function OrderPanel({ product }) {
   const site = useSite();
   const waMessage = `Hi ${site.company_name}, I'd like to order/enquire about the ${product.name} (SKU ${product.sku}). Please share wholesale pricing.`;
 
   return (
-    <div className="card p-7">
-      <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-fg">Direct Order</h3>
+    <div className="card mt-8 p-6 shadow-card">
+      <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-fg">Order &amp; Enquire</h3>
       <div className="mt-4 flex flex-col gap-3">
-        <a
-          href={whatsappLink(site.whatsapp_number, waMessage)}
-          target="_blank"
-          rel="noreferrer"
-          className="btn-whatsapp w-full"
-        >
-          <MessageCircle size={18} /> Contact via WhatsApp to Order
+        <a href={whatsappLink(site.whatsapp_number, waMessage)} target="_blank" rel="noreferrer" className="btn-whatsapp w-full">
+          <MessageCircle size={18} /> Order via WhatsApp
         </a>
-        <a href={telLink(site.phone_primary)} className="btn-outline w-full">
-          <Phone size={17} /> Call to Order
-        </a>
-        <Link to={`/contact?product=${product.slug}`} className="btn-ghost w-full">
-          <FileText size={16} /> Request a Written Quote
-        </Link>
-      </div>
-
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="flex items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-3 text-xs text-muted">
-          <PackageCheck size={16} className="text-accent" /> Bulk Orders Welcome
-        </div>
-        <div className="flex items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-3 text-xs text-muted">
-          <Zap size={16} className="text-accent" /> Fast Response Guaranteed
+        <div className="grid grid-cols-2 gap-3">
+          <a href={telLink(site.phone_primary)} className="btn-outline">
+            <Phone size={16} /> Call
+          </a>
+          <Link to={`/contact?product=${product.slug}`} className="btn-outline">
+            <FileText size={15} /> Quote
+          </Link>
         </div>
       </div>
+      <ul className="mt-5 grid gap-2 text-xs text-muted">
+        <li className="flex items-center gap-2"><Check size={14} className="text-accent" /> Wholesale &amp; retail pricing</li>
+        <li className="flex items-center gap-2"><PackageCheck size={14} className="text-accent" /> Bulk orders welcome</li>
+        <li className="flex items-center gap-2"><Zap size={14} className="text-accent" /> Fast response from our Colombo team</li>
+      </ul>
     </div>
   );
 }
@@ -140,7 +51,7 @@ function RelatedProducts({ slug }) {
         <p className="eyebrow mb-3">More to explore</p>
         <h2 className="section-title">You May Also Like</h2>
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-10 grid grid-cols-2 gap-5 lg:grid-cols-4">
         {items.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
@@ -196,9 +107,6 @@ export default function ProductPage() {
     );
   }
 
-  const tierPrices = (product.tiers || []).map((t) => t.price).filter((p) => p != null);
-  const bulkPrice = tierPrices.length ? Math.min(...tierPrices) : null;
-
   return (
     <div className="container-page py-10">
       <Breadcrumb
@@ -209,45 +117,50 @@ export default function ProductPage() {
         ]}
       />
 
-      <div className="mt-7 grid gap-12 lg:grid-cols-2">
-        <Gallery product={product} />
+      <div className="mt-7 grid gap-10 lg:grid-cols-2 lg:gap-16">
+        {/* Image */}
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <div className="group card relative aspect-square overflow-hidden shadow-card">
+            <ProductImage product={product} />
+          </div>
+        </div>
 
+        {/* Details */}
         <div>
-          <p className="eyebrow">{product.category_name}</p>
-          <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-fg">{product.name}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="pill !py-1 text-[10px] uppercase tracking-[0.12em]">{product.material}</span>
+            <span className="pill !py-1 text-[10px] uppercase tracking-[0.12em]">{product.type}</span>
+          </div>
+          <p className="eyebrow mt-4">{product.category_name}</p>
+          <h1 className="mt-2 font-display text-4xl font-bold leading-tight tracking-tight text-fg">
+            {product.name}
+          </h1>
           <p className="mt-2 text-sm text-muted">SKU: {product.sku}</p>
 
-          <div className="mt-4">
-            <Stars rating={product.rating} reviewCount={product.review_count} />
-          </div>
-
-          <div className="mt-7 flex flex-wrap items-end gap-x-10 gap-y-4 rounded-2xl border border-line bg-surface-2 p-5">
-            <div>
+          {/* Price card */}
+          <div className="mt-7 grid grid-cols-2 overflow-hidden rounded-2xl border border-line bg-surface-2 shadow-card">
+            <div className="border-r border-line p-5">
               <p className="text-[11px] font-medium uppercase tracking-wider text-faint">Retail Price</p>
-              <p className="mt-1 font-display text-3xl font-bold text-fg">
+              <p className="mt-1 font-display text-2xl font-bold text-fg sm:text-3xl">
                 {formatPrice(product.retail_price)}
               </p>
             </div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-faint">Wholesale Price</p>
-              <p className="mt-1 font-display text-3xl font-bold text-accent">
+            <div className="bg-accent/[0.06] p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-2 dark:text-accent">
+                Wholesale Price
+              </p>
+              <p className="mt-1 font-display text-2xl font-bold text-fg sm:text-3xl">
                 {formatPrice(product.wholesale_price)}
               </p>
-              {bulkPrice != null && (
-                <p className="mt-0.5 text-xs text-muted">from {formatPrice(bulkPrice)} in bulk</p>
-              )}
             </div>
           </div>
 
-          <p className="mt-6 text-sm leading-relaxed text-muted">{product.description}</p>
+          {product.description && (
+            <p className="mt-7 leading-relaxed text-muted">{product.description}</p>
+          )}
 
-          <TierTable tiers={product.tiers || []} />
+          <OrderPanel product={product} />
         </div>
-      </div>
-
-      <div className="mt-14 grid gap-6 lg:grid-cols-2">
-        <Specifications product={product} />
-        <OrderCTA product={product} />
       </div>
 
       <RelatedProducts slug={slug} />

@@ -116,10 +116,11 @@ Base URL: `/api`
 | `GET` | `/site` | Site settings (company, contact, hours, hero copy) |
 | `GET` | `/categories` | Categories with live product counts |
 | `GET` | `/products` | Filtered/sorted/paginated list **+ facet counts** |
-| `GET` | `/products/:slug` | Single product with colours + price tiers |
+| `GET` | `/products/:slug` | Single product (with colour options) |
 | `GET` | `/products/:slug/related` | Same-category suggestions |
 | `POST` | `/inquiries` | Create a "Contact to Order" enquiry (validated) |
-| `GET` | `/inquiries` | List recent enquiries (simple admin view) |
+| `POST` | `/admin/login` | Admin login (bcrypt, rate-limited) → bearer token |
+| `*` | `/admin/*` | Token-protected admin CRUD + inquiry inbox + stats |
 
 ### `GET /products` query params
 
@@ -153,10 +154,21 @@ Returns `201` with the created record, or `422` with field-level `errors`.
 
 ## Data model
 
-`categories` · `products` · `product_colors` · `price_tiers` · `inquiries` · `site_settings`
+`categories` · `products` · `product_colors` · `inquiries` · `site_settings` · `admin_users`
 (see `server/src/db.js`). The catalogue is seeded with 24 products across Wood, Metal, Plastic and
-Clip categories. Each product has a retail price, a base **wholesale price**, and a tiered
-quantity table where the per-piece price drops with volume (≈35% → 55% off retail).
+Clip categories. Prices are in **Sri Lankan rupees (LKR)** — each product has a retail price and a
+single **wholesale price** (no tiered pricing). All catalogue data is editable from the admin panel.
+
+## Admin panel & security
+
+The admin panel lives at **`/admin`** (linked discreetly in the footer). Sign in with the password from
+`ADMIN_PASSWORD` (default `wishadmin`, **change it in production**). It provides a dashboard, full product
+& category CRUD, single-image upload, and an inquiry inbox.
+
+Security: passwords are **bcrypt-hashed** in `admin_users`; login is **rate-limited** (5/15 min per IP);
+requests use a **token + role** with auth middleware (`requireAdmin` / `requireRole`); all input is
+validated. Set `HTTPS=true` to serve over TLS (a self-signed cert is generated if none is supplied; point
+`SSL_KEY_FILE`/`SSL_CERT_FILE` at real certs for production).
 
 ---
 

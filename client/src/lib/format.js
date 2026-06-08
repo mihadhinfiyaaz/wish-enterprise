@@ -1,6 +1,7 @@
+// Prices are in Sri Lankan rupees (whole numbers).
 export function formatPrice(value) {
   if (value == null) return 'Contact Us';
-  return `$${Number(value).toFixed(2)}`;
+  return `LKR ${Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 }
 
 // Build a wa.me deep link with an optional prefilled message.

@@ -16,7 +16,7 @@ const FALLBACK = {
   address_line1: '223, 10 2nd Cross Street',
   address_line2: 'Colombo 11',
   hours_weekday: 'Monday – Friday: 9:00 AM – 6:00 PM',
-  hours_saturday: 'Saturday: 9:00 AM – 1:00 PM',
+  hours_saturday: 'Saturday: 9:00 AM – 6:00 PM',
   hours_sunday: 'Sunday: Closed',
   map_query: '223 2nd Cross Street Colombo 11',
   map_url: 'https://maps.app.goo.gl/zAhtt37NwMJT5qh26',

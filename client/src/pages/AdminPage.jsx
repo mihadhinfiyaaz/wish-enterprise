@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus, Pencil, Trash2, X, Upload, LogOut, ExternalLink, Loader2, Lock, ImageOff, Package, Tags,
+  LayoutDashboard, Inbox, Mail, Phone, Archive, MailOpen, Building2,
 } from 'lucide-react';
 import api, { getAdminToken, setAdminToken } from '../lib/api';
 import ProductImage from '../components/ProductImage';
@@ -107,7 +108,7 @@ function Login({ onSuccess }) {
    Dashboard
    ════════════════════════════════════════════════════════════════ */
 function Dashboard({ onLogout }) {
-  const [tab, setTab] = useState('products');
+  const [tab, setTab] = useState('dashboard');
 
   async function logout() {
     try { await api.admin.logout(); } catch { /* ignore */ }
@@ -135,15 +136,17 @@ function Dashboard({ onLogout }) {
             </button>
           </div>
         </div>
-        <div className="container-page flex gap-1 pb-0">
+        <div className="container-page flex gap-1 overflow-x-auto pb-0">
           {[
+            ['dashboard', 'Dashboard', LayoutDashboard],
             ['products', 'Products', Package],
             ['categories', 'Categories', Tags],
+            ['inquiries', 'Inbox', Inbox],
           ].map(([id, label, Icon]) => (
             <button
               key={id}
               onClick={() => setTab(id)}
-              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
                 tab === id ? 'border-accent text-fg' : 'border-transparent text-muted hover:text-fg'
               }`}
             >
@@ -154,8 +157,158 @@ function Dashboard({ onLogout }) {
       </header>
 
       <main className="container-page py-8">
-        {tab === 'products' ? <ProductsManager /> : <CategoriesManager />}
+        {tab === 'dashboard' && <DashboardHome onNavigate={setTab} />}
+        {tab === 'products' && <ProductsManager />}
+        {tab === 'categories' && <CategoriesManager />}
+        {tab === 'inquiries' && <InquiriesManager />}
       </main>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Dashboard home
+   ════════════════════════════════════════════════════════════════ */
+function DashboardHome({ onNavigate }) {
+  const [stats, setStats] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    api.admin.stats().then(setStats).catch((e) => setError(e.message));
+  }, []);
+  if (error) return <p className="text-red-500">{error}</p>;
+  if (!stats) return <Loader2 className="mx-auto my-20 animate-spin text-muted" />;
+
+  const cards = [
+    { label: 'Products', value: stats.products, icon: Package, tab: 'products' },
+    { label: 'Categories', value: stats.categories, icon: Tags, tab: 'categories' },
+    { label: 'Inquiries', value: stats.inquiries.total, icon: Inbox, tab: 'inquiries' },
+    { label: 'New inquiries', value: stats.inquiries.new, icon: MailOpen, tab: 'inquiries' },
+  ];
+  return (
+    <div>
+      <h2 className="font-display text-xl font-bold text-fg">Dashboard</h2>
+      <p className="text-sm text-muted">Overview of your catalogue and enquiries.</p>
+      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {cards.map((c) => (
+          <button
+            key={c.label}
+            onClick={() => onNavigate(c.tab)}
+            className="card p-5 text-left shadow-card transition-all hover:-translate-y-0.5 hover:shadow-lift"
+          >
+            <div className="flex items-center justify-between">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-2 text-white shadow-[0_8px_18px_-8px_rgb(var(--c-accent)/0.6)]">
+                <c.icon size={18} />
+              </span>
+              {c.label === 'New inquiries' && c.value > 0 && (
+                <span className="pill !py-0.5 text-[10px] text-accent">new</span>
+              )}
+            </div>
+            <div className="mt-4 font-display text-3xl font-bold text-fg">{c.value}</div>
+            <div className="text-xs uppercase tracking-wider text-muted">{c.label}</div>
+          </button>
+        ))}
+      </div>
+
+      <div className="card mt-8 p-6 shadow-card">
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-fg">Recent enquiries</h3>
+          <button onClick={() => onNavigate('inquiries')} className="text-xs text-accent hover:underline">View all</button>
+        </div>
+        {stats.recent.length === 0 ? (
+          <p className="mt-4 text-sm text-muted">No enquiries yet.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-line">
+            {stats.recent.map((i) => (
+              <li key={i.id} className="flex items-start justify-between gap-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-fg">
+                    {i.name} <span className="text-faint">· {i.email}</span>
+                  </p>
+                  <p className="mt-0.5 line-clamp-1 text-xs text-muted">{i.message}</p>
+                </div>
+                <span className="shrink-0 text-xs text-faint">{new Date(i.created_at).toLocaleDateString()}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Inquiry inbox
+   ════════════════════════════════════════════════════════════════ */
+function InquiriesManager() {
+  const [items, setItems] = useState(null);
+  const [error, setError] = useState('');
+  const load = () => api.admin.listInquiries().then(setItems).catch((e) => setError(e.message));
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function setStatus(i, status) {
+    try { await api.admin.updateInquiry(i.id, status); load(); } catch (e) { alert(e.message); }
+  }
+  async function remove(i) {
+    if (!confirm(`Delete the enquiry from ${i.name}?`)) return;
+    try { await api.admin.deleteInquiry(i.id); load(); } catch (e) { alert(e.message); }
+  }
+
+  if (error) return <p className="text-red-500">{error}</p>;
+  if (!items) return <Loader2 className="mx-auto my-20 animate-spin text-muted" />;
+
+  return (
+    <div>
+      <div className="mb-5">
+        <h2 className="font-display text-xl font-bold text-fg">Inbox</h2>
+        <p className="text-sm text-muted">{items.length} enquir{items.length === 1 ? 'y' : 'ies'}</p>
+      </div>
+      {items.length === 0 ? (
+        <div className="card p-16 text-center shadow-card">
+          <Inbox className="mx-auto text-faint" />
+          <p className="mt-3 text-muted">No enquiries yet — they’ll appear here when customers use the contact form.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {items.map((i) => (
+            <div key={i.id} className={`card p-5 shadow-card ${i.status === 'new' ? 'border-accent/40' : ''}`}>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-display font-semibold text-fg">{i.name}</p>
+                    {i.status === 'new' && <span className="pill !py-0.5 text-[10px] text-accent">New</span>}
+                    {i.status === 'archived' && <span className="pill !py-0.5 text-[10px]">Archived</span>}
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                    <a href={`mailto:${i.email}`} className="inline-flex items-center gap-1 hover:text-accent"><Mail size={12} /> {i.email}</a>
+                    {i.phone && <a href={`tel:${i.phone}`} className="inline-flex items-center gap-1 hover:text-accent"><Phone size={12} /> {i.phone}</a>}
+                    {i.company && <span className="inline-flex items-center gap-1"><Building2 size={12} /> {i.company}</span>}
+                  </div>
+                </div>
+                <span className="shrink-0 text-xs text-faint">{new Date(i.created_at).toLocaleString()}</span>
+              </div>
+              {(i.product_name || i.quantity) && (
+                <p className="mt-3 text-xs text-muted">
+                  Interested in: <span className="text-fg">{i.product_name || '—'}</span>
+                  {i.quantity ? ` · Qty ${i.quantity}` : ''}
+                </p>
+              )}
+              <p className="mt-3 whitespace-pre-wrap text-sm text-fg/90">{i.message}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <a href={`mailto:${i.email}`} className="btn-outline !px-3 !py-1.5 text-xs">Reply</a>
+                {i.status !== 'read' && (
+                  <button onClick={() => setStatus(i, 'read')} className="btn-ghost !px-3 !py-1.5 text-xs"><MailOpen size={13} /> Mark read</button>
+                )}
+                {i.status !== 'archived' ? (
+                  <button onClick={() => setStatus(i, 'archived')} className="btn-ghost !px-3 !py-1.5 text-xs"><Archive size={13} /> Archive</button>
+                ) : (
+                  <button onClick={() => setStatus(i, 'new')} className="btn-ghost !px-3 !py-1.5 text-xs">Unarchive</button>
+                )}
+                <button onClick={() => remove(i)} className="btn-ghost !px-3 !py-1.5 text-xs text-red-500"><Trash2 size={13} /> Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -177,7 +330,7 @@ function ProductsManager() {
       })
       .catch((e) => setError(e.message));
   };
-  useEffect(load, []);
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function remove(p) {
     if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
@@ -277,8 +430,6 @@ function ProductEditor({ product, categories, onClose, onSaved }) {
     retail_price: product.retail_price ?? '',
     wholesale_price: product.wholesale_price ?? '',
     sku: product.sku || '',
-    rating: product.rating ?? 4.5,
-    review_count: product.review_count ?? 0,
     size: product.size || '',
     durability: product.durability || '',
     finish: product.finish || '',
@@ -400,11 +551,11 @@ function ProductEditor({ product, categories, onClose, onSaved }) {
                 {TYPES.map((t) => <option key={t}>{t}</option>)}
               </select>
             </Field>
-            <Field label="Retail Price ($)" error={errors.retail_price}>
-              <input className="input" type="number" step="0.01" min="0" value={form.retail_price} onChange={set('retail_price')} />
+            <Field label="Retail Price (LKR)" error={errors.retail_price}>
+              <input className="input" type="number" step="1" min="0" value={form.retail_price} onChange={set('retail_price')} />
             </Field>
-            <Field label="Wholesale Price ($)">
-              <input className="input" type="number" step="0.01" min="0" value={form.wholesale_price} onChange={set('wholesale_price')} placeholder="auto if blank" />
+            <Field label="Wholesale Price (LKR)">
+              <input className="input" type="number" step="1" min="0" value={form.wholesale_price} onChange={set('wholesale_price')} placeholder="auto if blank" />
             </Field>
             <Field label="Hanger Style">
               <select className="input" value={form.hanger_style} onChange={set('hanger_style')}>
@@ -413,12 +564,6 @@ function ProductEditor({ product, categories, onClose, onSaved }) {
             </Field>
             <Field label="Popularity (sort)">
               <input className="input" type="number" value={form.popularity} onChange={set('popularity')} />
-            </Field>
-            <Field label="Rating (0–5)">
-              <input className="input" type="number" step="0.1" min="0" max="5" value={form.rating} onChange={set('rating')} />
-            </Field>
-            <Field label="Reviews">
-              <input className="input" type="number" min="0" value={form.review_count} onChange={set('review_count')} />
             </Field>
             <Field label="Size">
               <input className="input" value={form.size} onChange={set('size')} />
@@ -460,7 +605,7 @@ function CategoriesManager() {
   const [error, setError] = useState('');
 
   const load = () => api.getCategories().then(setCategories).catch((e) => setError(e.message));
-  useEffect(load, []);
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function remove(c) {
     if (!confirm(`Delete category "${c.name}"?`)) return;

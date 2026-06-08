@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Tags, LayoutGrid, Headphones, ArrowRight, ArrowUpRight } from 'lucide-react';
+import {
+  ShieldCheck, Tags, LayoutGrid, Headphones, ArrowRight, ArrowUpRight, Check, MapPin,
+} from 'lucide-react';
 import ProductImage from '../components/ProductImage';
+import ProductCard from '../components/ProductCard';
 import api from '../lib/api';
 import { useSite } from '../context/SiteContext';
 import { getCategoryImage } from '../lib/productImages';
@@ -24,9 +27,9 @@ function Hero() {
   const site = useSite();
   const slides = useMemo(
     () => [
-      { title: site.hero_title, subtitle: site.hero_subtitle, variant: 'suit', material: 'Wood' },
-      { title: 'Built for Bulk. Priced for Business.', subtitle: 'Tiered wholesale pricing on every product in our range.', variant: 'trouser', material: 'Metal' },
-      { title: 'Wood, Metal, Plastic & Clip.', subtitle: 'One trusted supplier for every hanger you need.', variant: 'clip', material: 'Plastic' },
+      { title: site.hero_title, subtitle: site.hero_subtitle, material: 'Wood', type: 'Suit' },
+      { title: 'Built for bulk. Priced for business.', subtitle: 'Honest wholesale prices on every product in our range.', material: 'Metal', type: 'Suit' },
+      { title: 'Wood, metal, plastic & clip.', subtitle: 'One trusted Colombo supplier for every hanger you need.', material: 'Plastic', type: 'Suit' },
     ],
     [site.hero_title, site.hero_subtitle]
   );
@@ -36,39 +39,48 @@ function Hero() {
     const id = setInterval(() => setIndex((i) => (i + 1) % slides.length), 6000);
     return () => clearInterval(id);
   }, [slides.length]);
-
   const slide = slides[index];
 
   return (
-    <section className="relative overflow-hidden border-b border-line">
-      <div className="container-page grid items-center gap-10 py-20 md:grid-cols-2 md:py-28">
+    <section className="relative overflow-hidden border-b border-line bg-gradient-to-b from-base-alt/60 to-base">
+      <div className="container-page grid items-center gap-12 py-16 md:grid-cols-2 md:py-24">
         <div key={index} className="animate-fade-up">
-          <p className="eyebrow mb-5">Wholesale &amp; Retail · Est. Quality</p>
-          <h1 className="font-display text-[2.6rem] font-bold leading-[1.05] tracking-tight text-fg sm:text-6xl">
+          <p className="eyebrow mb-5">Wholesale &amp; Retail · Colombo</p>
+          <h1 className="font-display text-[2.6rem] font-bold leading-[1.04] tracking-tight text-fg sm:text-6xl">
             {slide.title}
           </h1>
           <p className="mt-6 max-w-md text-lg leading-relaxed text-muted">{slide.subtitle}</p>
           <div className="mt-9 flex flex-wrap gap-3">
-            <Link to="/contact" className="btn-solid">
-              Contact to Order
-            </Link>
+            <Link to="/contact" className="btn-solid">Contact to Order</Link>
             <Link to="/hangers" className="btn-outline">
               Browse All Hangers <ArrowRight size={16} />
             </Link>
           </div>
+          <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted">
+            <span className="inline-flex items-center gap-1.5"><Check size={14} className="text-accent" /> Wood · Metal · Plastic · Clip</span>
+            <span className="inline-flex items-center gap-1.5"><Check size={14} className="text-accent" /> Bulk &amp; single orders</span>
+          </div>
         </div>
 
-        <div className="flex items-center justify-center">
-          <div className="group relative aspect-square w-full max-w-md overflow-hidden rounded-[2rem] border border-line shadow-card">
-            <ProductImage
-              product={{ hanger_style: slide.variant, material: 'Wood', name: 'Wish Enterprise studio hanger' }}
-              zoom={false}
-            />
+        {/* Image with depth + floating accents */}
+        <div className="relative mx-auto w-full max-w-md">
+          <div className="media-glow pointer-events-none absolute -inset-10" />
+          <div
+            key={slide.material + slide.type}
+            className="group relative aspect-square w-full animate-fade-in overflow-hidden rounded-[2rem] border border-line shadow-lift"
+          >
+            <ProductImage product={{ material: slide.material, type: slide.type, hanger_style: 'suit' }} zoom={false} />
+          </div>
+          <div className="absolute -bottom-4 -left-3 flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-2.5 text-xs font-medium text-fg shadow-lift">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-accent"><Check size={13} /></span>
+            Wholesale &amp; Retail
+          </div>
+          <div className="absolute -right-3 -top-3 flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-2.5 text-xs font-medium text-fg shadow-lift">
+            <MapPin size={14} className="text-accent" /> Colombo 11
           </div>
         </div>
       </div>
 
-      {/* Carousel dots */}
       <div className="flex justify-center gap-2 pb-10">
         {slides.map((_, i) => (
           <button
@@ -87,12 +99,8 @@ function Hero() {
 
 function FeaturedCategories() {
   const [categories, setCategories] = useState(CATEGORY_FALLBACK);
-
   useEffect(() => {
-    api
-      .getCategories()
-      .then((data) => data?.length && setCategories(data))
-      .catch(() => {});
+    api.getCategories().then((d) => d?.length && setCategories(d)).catch(() => {});
   }, []);
 
   return (
@@ -106,22 +114,16 @@ function FeaturedCategories() {
           <Link
             key={cat.slug}
             to={`/hangers?category=${cat.slug}`}
-            className="group card flex flex-col items-center gap-4 p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-line-2 hover:shadow-lift"
+            className="group card flex flex-col items-center gap-4 p-5 text-center shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-line-2 hover:shadow-lift"
           >
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-line">
               <ProductImage
                 product={{ hanger_style: cat.icon || 'suit' }}
-                image={
-                  getCategoryImage(cat.slug)
-                    ? { src: getCategoryImage(cat.slug), alt: `${cat.name} — product photo` }
-                    : undefined
-                }
+                image={getCategoryImage(cat.slug) ? { src: getCategoryImage(cat.slug), alt: `${cat.name} — product photo` } : undefined}
               />
             </div>
             <div>
-              <h3 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-fg">
-                {cat.name}
-              </h3>
+              <h3 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-fg">{cat.name}</h3>
               {cat.product_count != null && (
                 <p className="mt-1.5 inline-flex items-center gap-1 text-xs text-muted">
                   {cat.product_count} products
@@ -136,13 +138,42 @@ function FeaturedCategories() {
   );
 }
 
-function Benefits() {
+function BestSellers() {
+  const [items, setItems] = useState([]);
+  useEffect(() => {
+    api.getProducts({ pageSize: 4, sort: 'popular' }).then((r) => setItems(r.items || [])).catch(() => {});
+  }, []);
+  if (!items.length) return null;
+
   return (
     <section className="border-y border-line bg-base-alt">
-      <div className="container-page grid grid-cols-2 gap-x-8 gap-y-10 py-14 lg:grid-cols-4">
+      <div className="container-page py-20">
+        <div className="flex flex-col items-end justify-between gap-4 sm:flex-row">
+          <div>
+            <p className="eyebrow mb-3">Most Popular</p>
+            <h2 className="font-display text-2xl font-bold tracking-tight text-fg sm:text-3xl">Best Sellers</h2>
+          </div>
+          <Link to="/hangers" className="btn-outline">
+            View all <ArrowRight size={16} />
+          </Link>
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-5 lg:grid-cols-4">
+          {items.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Benefits() {
+  return (
+    <section className="container-page py-16">
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {BENEFITS.map(({ icon: Icon, title, text }) => (
-          <div key={title} className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface text-accent shadow-card">
+          <div key={title} className="card flex items-center gap-4 p-5 shadow-card">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent-2 text-white shadow-[0_8px_18px_-8px_rgb(var(--c-accent)/0.6)]">
               <Icon size={20} />
             </div>
             <div>
@@ -156,12 +187,31 @@ function Benefits() {
   );
 }
 
+function CtaBand() {
+  return (
+    <section className="container-page pb-20">
+      <div className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-surface to-base-alt p-10 text-center shadow-lift sm:p-14">
+        <div className="media-glow pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full" />
+        <h2 className="relative font-display text-2xl font-bold tracking-tight text-fg sm:text-3xl">
+          Need hangers in bulk?
+        </h2>
+        <p className="relative mx-auto mt-3 max-w-xl text-muted">
+          Tell us what you need and our Colombo team will reply with pricing and availability — usually within a day.
+        </p>
+        <Link to="/contact" className="btn-solid relative mt-7">Contact to Order</Link>
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
       <Hero />
       <FeaturedCategories />
+      <BestSellers />
       <Benefits />
+      <CtaBand />
     </>
   );
 }

@@ -26,9 +26,6 @@ function attachProductRelations(product) {
   product.colors = db
     .prepare('SELECT name, hex FROM product_colors WHERE product_id = ? ORDER BY sort_order')
     .all(product.id);
-  product.tiers = db
-    .prepare('SELECT label, min_qty, max_qty, price FROM price_tiers WHERE product_id = ? ORDER BY sort_order')
-    .all(product.id);
   return product;
 }
 

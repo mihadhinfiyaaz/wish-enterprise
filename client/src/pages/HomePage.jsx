@@ -4,9 +4,9 @@ import {
   ShieldCheck, Tags, LayoutGrid, Headphones, ArrowRight, ArrowUpRight, Check,
 } from 'lucide-react';
 
-// The hangers-lineup hero shot sits on this exact warm cream so it blends into the card.
-const RANGE_IMAGE = '/hangers-range.png';
-const RANGE_BG = '#ede5d8';
+// White-background hangers lineup — blends into the studio niche like the other slides.
+// ?v busts the browser cache after re-editing the file.
+const RANGE_IMAGE = '/hangers-range.png?v=2';
 import ProductImage from '../components/ProductImage';
 import ProductCard from '../components/ProductCard';
 import api from '../lib/api';
@@ -67,24 +67,22 @@ function Hero() {
         </div>
 
         {/* Image */}
-        <div className="relative mx-auto w-full max-w-md">
+        <div className="relative w-full">
           {slide.customImage ? (
             <div
               key={slide.customImage}
-              className="relative aspect-square w-full animate-fade-in overflow-hidden rounded-[2rem] shadow-lift"
-              style={{ backgroundColor: RANGE_BG }}
+              className="group relative aspect-[4/3] w-full animate-fade-in overflow-hidden rounded-[2rem] border border-line shadow-lift"
             >
-              <img
-                src={slide.customImage}
-                alt="Wood, metal, plastic and clip hangers"
-                className="h-full w-full object-contain"
-                draggable="false"
+              <ProductImage
+                image={{ src: slide.customImage, alt: 'Wood, metal, plastic and clip hangers' }}
+                zoom={false}
+                pad="4%"
               />
             </div>
           ) : (
             <div
               key={slide.material + slide.type}
-              className="group relative aspect-square w-full animate-fade-in overflow-hidden rounded-[2rem] border border-line shadow-lift"
+              className="group relative mx-auto aspect-square w-full max-w-md animate-fade-in overflow-hidden rounded-[2rem] border border-line shadow-lift"
             >
               <ProductImage product={{ material: slide.material, type: slide.type, hanger_style: 'suit' }} zoom={false} />
             </div>

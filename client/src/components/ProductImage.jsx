@@ -18,6 +18,7 @@ export default function ProductImage({
   rounded = '',
   className = '',
   sizes,
+  pad = '9%',
 }) {
   // Priority: explicit prop → admin-uploaded DB image → bundled studio default.
   const image =
@@ -47,8 +48,9 @@ export default function ProductImage({
           decoding="async"
           sizes={sizes}
           onLoad={() => setLoaded(true)}
+          style={{ padding: pad }}
           className={[
-            'relative h-full w-full select-none object-contain p-[9%]',
+            'relative h-full w-full select-none object-contain',
             'transition-[opacity,transform] duration-700 ease-out [mix-blend-mode:multiply]',
             loaded ? 'opacity-100' : 'opacity-0',
             zoom ? 'group-hover:scale-[1.06]' : '',

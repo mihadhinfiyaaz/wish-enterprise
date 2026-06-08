@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ShieldCheck, Tags, LayoutGrid, Headphones, ArrowRight, ArrowUpRight, Check, MapPin,
+  ShieldCheck, Tags, LayoutGrid, Headphones, ArrowRight, ArrowUpRight, Check,
 } from 'lucide-react';
+
+// The hangers-lineup hero shot sits on this exact warm cream so it blends into the card.
+const RANGE_IMAGE = '/hangers-range.png';
+const RANGE_BG = '#ede5d8';
 import ProductImage from '../components/ProductImage';
 import ProductCard from '../components/ProductCard';
 import api from '../lib/api';
@@ -29,7 +33,7 @@ function Hero() {
     () => [
       { title: site.hero_title, subtitle: site.hero_subtitle, material: 'Wood', type: 'Suit' },
       { title: 'Built for bulk. Priced for business.', subtitle: 'Honest wholesale prices on every product in our range.', material: 'Metal', type: 'Suit' },
-      { title: 'Wood, metal, plastic & clip.', subtitle: 'One trusted Colombo supplier for every hanger you need.', material: 'Plastic', type: 'Suit' },
+      { title: 'Wood, metal, plastic & clip.', subtitle: 'One trusted Colombo supplier for every hanger you need.', customImage: RANGE_IMAGE },
     ],
     [site.hero_title, site.hero_subtitle]
   );
@@ -62,22 +66,29 @@ function Hero() {
           </div>
         </div>
 
-        {/* Image with depth + floating accents */}
+        {/* Image */}
         <div className="relative mx-auto w-full max-w-md">
-          <div className="media-glow pointer-events-none absolute -inset-10" />
-          <div
-            key={slide.material + slide.type}
-            className="group relative aspect-square w-full animate-fade-in overflow-hidden rounded-[2rem] border border-line shadow-lift"
-          >
-            <ProductImage product={{ material: slide.material, type: slide.type, hanger_style: 'suit' }} zoom={false} />
-          </div>
-          <div className="absolute -bottom-4 -left-3 flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-2.5 text-xs font-medium text-fg shadow-lift">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-accent"><Check size={13} /></span>
-            Wholesale &amp; Retail
-          </div>
-          <div className="absolute -right-3 -top-3 flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-2.5 text-xs font-medium text-fg shadow-lift">
-            <MapPin size={14} className="text-accent" /> Colombo 11
-          </div>
+          {slide.customImage ? (
+            <div
+              key={slide.customImage}
+              className="relative aspect-square w-full animate-fade-in overflow-hidden rounded-[2rem] shadow-lift"
+              style={{ backgroundColor: RANGE_BG }}
+            >
+              <img
+                src={slide.customImage}
+                alt="Wood, metal, plastic and clip hangers"
+                className="h-full w-full object-contain"
+                draggable="false"
+              />
+            </div>
+          ) : (
+            <div
+              key={slide.material + slide.type}
+              className="group relative aspect-square w-full animate-fade-in overflow-hidden rounded-[2rem] border border-line shadow-lift"
+            >
+              <ProductImage product={{ material: slide.material, type: slide.type, hanger_style: 'suit' }} zoom={false} />
+            </div>
+          )}
         </div>
       </div>
 

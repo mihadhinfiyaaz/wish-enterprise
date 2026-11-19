@@ -52,11 +52,18 @@ export default {
           '0%,100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-10px)' },
         },
+        // Hero hanger wall: the track holds two identical blocks, so moving it
+        // from -50% to 0 drifts it downwards and loops with no visible seam.
+        drift: {
+          '0%': { transform: 'translate3d(0,-50%,0)' },
+          '100%': { transform: 'translate3d(0,0,0)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.5s ease both',
         'fade-up': 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) both',
         float: 'float 6s ease-in-out infinite',
+        drift: 'drift 110s linear infinite',
       },
     },
   },

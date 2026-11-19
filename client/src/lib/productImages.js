@@ -112,6 +112,14 @@ export function hasLocalPhoto(product) {
   return getProductImages(product).length > 0;
 }
 
+/** One primary (front) photo per hanger type — used by the hero's drifting wall. */
+export function getTypeImages() {
+  return Object.keys(sets)
+    .sort()
+    .map((key) => sets[key][0])
+    .filter(Boolean);
+}
+
 // Representative photo for a category tile.
 const CATEGORY_SET = { wood: 'wood-suit', metal: 'metal-suit', plastic: 'plastic-black', clip: 'wood-clip' };
 export function getCategoryImage(slug) {
